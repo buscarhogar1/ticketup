@@ -8,17 +8,28 @@
   </head>
   <body>
     <main class="container">
-      <h1>TicketUp - Demo</h1>
-      <p class="muted">Leyendo datos públicos desde Supabase (event + listing PUBLISHED).</p>
+      <header class="header">
+        <h1>TicketUp</h1>
+        <p class="muted">Marketplace demo (solo datos públicos).</p>
+      </header>
 
       <section class="card">
-        <h2>Evento</h2>
-        <pre id="eventBox">Cargando...</pre>
+        <h2>Eventos</h2>
+        <div id="eventsStatus" class="muted">Cargando eventos...</div>
+        <ul id="eventsList" class="list"></ul>
       </section>
 
-      <section class="card">
-        <h2>Listing</h2>
-        <pre id="listingBox">Cargando...</pre>
+      <section class="card" id="eventDetailCard" style="display:none;">
+        <div class="row-between">
+          <h2 id="eventTitle">Evento</h2>
+          <button id="backBtn" class="btn">Volver</button>
+        </div>
+
+        <div id="eventMeta" class="muted"></div>
+
+        <h3 class="sectionTitle">Entradas disponibles</h3>
+        <div id="listingsStatus" class="muted">Cargando entradas...</div>
+        <div id="listingsGrid" class="grid"></div>
       </section>
 
       <section class="card error" id="errorBox" style="display:none;">
