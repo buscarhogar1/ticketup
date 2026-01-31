@@ -3,36 +3,77 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TicketUp - Demo</title>
+    <title>TicketUp</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="container">
-      <header class="header">
-        <h1>TicketUp</h1>
-        <p class="muted">Marketplace demo (solo datos públicos).</p>
-      </header>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="logo">TU</div>
+          <div class="brand-text">
+            <div class="brand-name">TicketUp</div>
+            <div class="brand-sub">precio final, sin sorpresas</div>
+          </div>
+        </div>
 
-      <section class="card">
-        <h2>Eventos</h2>
+        <div class="search">
+          <input id="searchInput" class="search-input" type="search" placeholder="Busca evento, ciudad o sala" />
+        </div>
+
+        <div class="topbar-actions">
+          <button id="sellBtn" class="btn btn-primary">Vender</button>
+          <button id="loginBtn" class="btn">Entrar</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="panel">
+        <div class="panel-head">
+          <h1>Eventos</h1>
+
+          <div class="filters">
+            <select id="cityFilter" class="select">
+              <option value="">Cualquier ciudad</option>
+            </select>
+
+            <label class="check">
+              <input id="onlyWithTickets" type="checkbox" />
+              <span>Solo con entradas</span>
+            </label>
+          </div>
+        </div>
+
         <div id="eventsStatus" class="muted">Cargando eventos...</div>
-        <ul id="eventsList" class="list"></ul>
+        <div id="eventsGrid" class="events-grid"></div>
       </section>
 
-      <section class="card" id="eventDetailCard" style="display:none;">
-        <div class="row-between">
-          <h2 id="eventTitle">Evento</h2>
+      <section class="panel" id="eventDetail" style="display:none;">
+        <div class="breadcrumb">
+          <a href="#" id="backLink">Eventos</a>
+          <span class="sep">/</span>
+          <span id="crumbEventName">Evento</span>
+        </div>
+
+        <div class="event-hero">
+          <div>
+            <h2 id="eventTitle">Evento</h2>
+            <div id="eventMeta" class="muted"></div>
+          </div>
           <button id="backBtn" class="btn">Volver</button>
         </div>
 
-        <div id="eventMeta" class="muted"></div>
+        <div class="section-row">
+          <h3>Entradas disponibles</h3>
+          <div class="muted" id="listingsCount"></div>
+        </div>
 
-        <h3 class="sectionTitle">Entradas disponibles</h3>
         <div id="listingsStatus" class="muted">Cargando entradas...</div>
-        <div id="listingsGrid" class="grid"></div>
+        <div id="listingsGrid" class="tickets-grid"></div>
       </section>
 
-      <section class="card error" id="errorBox" style="display:none;">
+      <section class="panel error" id="errorBox" style="display:none;">
         <h2>Error</h2>
         <pre id="errorText"></pre>
       </section>
