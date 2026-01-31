@@ -17,32 +17,76 @@
           </div>
         </div>
 
-        <div class="search">
-          <input id="searchInput" class="search-input" type="search" placeholder="Busca evento, ciudad o sala" />
-        </div>
-
         <div class="topbar-actions">
-          <button id="sellBtn" class="btn btn-primary">Vender</button>
-          <button id="loginBtn" class="btn">Entrar</button>
+          <button id="sellBtn" class="btn">Vender</button>
+          <button id="loginBtn" class="btn">Iniciar sesión</button>
+          <button id="ctaBtn" class="btn btn-primary">Vende tu entrada</button>
         </div>
       </div>
     </header>
 
     <main class="container">
-      <section class="panel" id="eventsPanel">
-        <div class="panel-head">
-          <h1>Eventos</h1>
+      <section class="hero">
+        <h1 class="hero-title">Encuentra entradas</h1>
+        <p class="hero-sub">Precio final desde el primer clic. Gastos incluidos.</p>
 
-          <div class="filters">
-            <select id="cityFilter" class="select">
-              <option value="">Cualquier ciudad</option>
-            </select>
-
-            <label class="check">
-              <input id="onlyWithTickets" type="checkbox" />
-              <span>Solo con entradas</span>
-            </label>
+        <div class="hero-card">
+          <div class="date-row">
+            <div class="field">
+              <label class="label" for="dateFrom">Desde</label>
+              <input id="dateFrom" class="input" type="date" />
+            </div>
+            <div class="field">
+              <label class="label" for="dateTo">Hasta</label>
+              <input id="dateTo" class="input" type="date" />
+            </div>
+            <div class="field field-grow">
+              <label class="label" for="cityFilter">Ciudad</label>
+              <select id="cityFilter" class="select">
+                <option value="">Cualquier ciudad</option>
+              </select>
+            </div>
           </div>
+
+          <div class="search-row">
+            <div class="search-icon" aria-hidden="true">⌕</div>
+            <input
+              id="searchInput"
+              class="search-input"
+              type="search"
+              placeholder="Busca evento, artista, equipo o sala"
+            />
+            <button id="searchBtn" class="btn btn-primary search-btn">Buscar</button>
+          </div>
+
+          <div class="type-row">
+            <div class="type-label">Tipo</div>
+            <div id="typeChips" class="chips"></div>
+          </div>
+
+          <div class="helper-row muted">
+            Puedes combinar fechas, ciudad y tipo. Siempre verás el precio final.
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Destacados</h2>
+          <div class="muted">Ejemplos de lo que se vende</div>
+        </div>
+
+        <div id="featuredStatus" class="muted">Cargando destacados...</div>
+        <div id="featuredRow" class="carousel" aria-label="Destacados"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Eventos</h2>
+          <label class="check">
+            <input id="onlyWithTickets" type="checkbox" />
+            <span>Solo con entradas</span>
+          </label>
         </div>
 
         <div id="eventsStatus" class="muted">Cargando eventos...</div>
@@ -51,7 +95,7 @@
 
       <section class="panel" id="eventDetail" style="display:none;">
         <div class="breadcrumb">
-          <a href="#" id="backLink">Eventos</a>
+          <a href="#" id="backLink">Inicio</a>
           <span class="sep">/</span>
           <span id="crumbEventName">Evento</span>
         </div>
@@ -81,7 +125,7 @@
 
     <footer class="footer">
       <div class="footer-inner">
-        <div>© 2026 Buscar Hogar</div>
+        <div>© 2026 TicketUp</div>
         <div class="footer-links">
           <a href="#" id="termsLink">Términos de uso</a>
           <span>·</span>
@@ -95,3 +139,4 @@
     <script type="module" src="app.js"></script>
   </body>
 </html>
+
