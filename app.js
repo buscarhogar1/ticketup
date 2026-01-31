@@ -6,11 +6,20 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const eventsStatus = document.getElementById("eventsStatus");
 const eventsGrid = document.getElementById("eventsGrid");
-const eventsPanel = document.getElementById("eventsPanel");
+
+const featuredStatus = document.getElementById("featuredStatus");
+const featuredRow = document.getElementById("featuredRow");
 
 const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+
+const dateFrom = document.getElementById("dateFrom");
+const dateTo = document.getElementById("dateTo");
+
 const cityFilter = document.getElementById("cityFilter");
 const onlyWithTickets = document.getElementById("onlyWithTickets");
+
+const typeChips = document.getElementById("typeChips");
 
 const eventDetail = document.getElementById("eventDetail");
 const backBtn = document.getElementById("backBtn");
@@ -29,8 +38,10 @@ const errorText = document.getElementById("errorText");
 
 const sellBtn = document.getElementById("sellBtn");
 const loginBtn = document.getElementById("loginBtn");
+const ctaBtn = document.getElementById("ctaBtn");
 
 let allEvents = [];
+let selectedType = "";
 
 function showError(msg) {
   errorText.textContent = msg;
@@ -49,11 +60,13 @@ function formatDate(iso) {
     return iso;
   }
 }
+
 function eur(n) {
   const v = Number(n);
   if (Number.isNaN(v)) return String(n);
   return v.toFixed(2) + " €";
 }
+
 function seatLabel(l) {
   const parts = [];
   if (l.zone) parts.push(`Zona: ${l.zone}`);
@@ -65,6 +78,58 @@ function seatLabel(l) {
 
 function normalize(s) {
   return (s || "").toString().toLowerCase().trim();
+}
+
+function inDateRange(eventIso) {
+  const ev = new Date(eventIso);
+  if (dateFrom.value) {
+    const from = new Date(dateFrom.value + "T00:00:00");
+    if (ev < from) return false;
+  }
+  if (dateTo.value) {
+    const to = new Date(dateTo.value + "T23:59:59");
+    if (ev > to) return false;
+  }
+  return true;
+}
+
+function renderTypeChips() {
+  typeChips.innerHTML = "";
+
+  const fixed = [
+    { key: "", label: "Todos" },
+    { key: "FOOTBALL", label: "Fútbol" },
+    { key: "CONCERT", label: "Música" },
+    { key: "THEATRE", label: "Teatro" },
+    { key: "FESTIVAL", label: "Festival" },
+    { key: "SPORT", label: "Deporte" },
+    { key: "COMEDY", label: "Comedia" },
+    { key: "OTHER", label: "Otros" },
+  ];
+
+  for (const t of fixed) {
+    const btn = document.createElement("button");
+    btn.className = "chip" + (selectedType === t.key ? " chip-active" : "");
+    btn.type = "button";
+    btn.textContent = t.label;
+    btn.addEventListener("click", () => {
+      selectedType = t.key;
+      renderTypeChips();
+      applyFilters();
+    });
+    typeChips.appendChild(btn);
+  }
+}
+
+function fillCityOptions() {
+  cityFilter.innerHTML = '<option value="">Cualquier ciudad</option>';
+  const cities = Array.from(new Set(allEvents.map(e => e.city))).sort((a, b) => a.localeCompare(b, "es"));
+  for (const c of cities) {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    cityFilter.appendChild(opt);
+  }
 }
 
 function renderEvents(list) {
@@ -89,6 +154,30 @@ function renderEvents(list) {
   }
 }
 
+function renderFeatured(list) {
+  featuredRow.innerHTML = "";
+
+  if (!list || list.length === 0) {
+    featuredStatus.textContent = "No hay destacados todavía.";
+    return;
+  }
+
+  featuredStatus.textContent = "";
+  for (const ev of list) {
+    const card = document.createElement("div");
+    card.className = "feature-card";
+    card.innerHTML = `
+      <div class="feature-img"></div>
+      <div class="feature-body">
+        <div class="feature-title">${ev.name}</div>
+        <div class="feature-meta">${ev.city} · ${formatDate(ev.start_datetime)}</div>
+      </div>
+    `;
+    card.addEventListener("click", () => openEvent(ev));
+    featuredRow.appendChild(card);
+  }
+}
+
 function applyFilters() {
   const q = normalize(searchInput.value);
   const city = cityFilter.value;
@@ -102,40 +191,32 @@ function applyFilters() {
     });
   }
 
-  if (city) {
-    filtered = filtered.filter(ev => ev.city === city);
-  }
+  if (city) filtered = filtered.filter(ev => ev.city === city);
 
-  if (onlyWithTickets.checked) {
-    filtered = filtered.filter(ev => (ev._published_count || 0) > 0);
-  }
+  if (selectedType) filtered = filtered.filter(ev => (ev.event_type || "") === selectedType);
+
+  filtered = filtered.filter(ev => inDateRange(ev.start_datetime));
+
+  if (onlyWithTickets.checked) filtered = filtered.filter(ev => (ev._published_count || 0) > 0);
 
   renderEvents(filtered);
-}
-
-function fillCityOptions() {
-  const cities = Array.from(new Set(allEvents.map(e => e.city))).sort((a,b) => a.localeCompare(b, "es"));
-  for (const c of cities) {
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = c;
-    cityFilter.appendChild(opt);
-  }
 }
 
 async function loadEvents() {
   clearError();
   eventsStatus.textContent = "Cargando eventos...";
+  featuredStatus.textContent = "Cargando destacados...";
 
   const { data: events, error } = await supabase
     .from("event")
-    .select("id,name,start_datetime,venue_name,city,is_paused")
+    .select("id,name,start_datetime,venue_name,city,event_type,is_paused")
     .eq("is_paused", false)
     .order("start_datetime", { ascending: true });
 
   if (error) {
     showError("Error cargando eventos: " + error.message);
     eventsStatus.textContent = "";
+    featuredStatus.textContent = "";
     return;
   }
 
@@ -150,7 +231,15 @@ async function loadEvents() {
   }
 
   fillCityOptions();
+  renderTypeChips();
+
   applyFilters();
+
+  const featured = [...allEvents]
+    .sort((a, b) => (b._published_count || 0) - (a._published_count || 0))
+    .slice(0, 10);
+
+  renderFeatured(featured);
 }
 
 function renderListings(listings) {
@@ -187,7 +276,6 @@ function renderListings(listings) {
 async function openEvent(ev) {
   clearError();
   eventDetail.style.display = "block";
-  eventsPanel.style.display = "none";
 
   crumbEventName.textContent = ev.name;
   eventTitle.textContent = ev.name;
@@ -210,11 +298,11 @@ async function openEvent(ev) {
   }
 
   renderListings(data);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 }
 
 function closeEvent() {
   eventDetail.style.display = "none";
-  eventsPanel.style.display = "block";
   clearError();
 }
 
@@ -222,11 +310,17 @@ backBtn.addEventListener("click", closeEvent);
 backLink.addEventListener("click", (e) => { e.preventDefault(); closeEvent(); });
 
 searchInput.addEventListener("input", applyFilters);
+searchBtn.addEventListener("click", applyFilters);
+
 cityFilter.addEventListener("change", applyFilters);
 onlyWithTickets.addEventListener("change", applyFilters);
 
+dateFrom.addEventListener("change", applyFilters);
+dateTo.addEventListener("change", applyFilters);
+
 sellBtn.addEventListener("click", () => alert("MVP: vender aún no está activo."));
-loginBtn.addEventListener("click", () => alert("MVP: login aún no está activo."));
+loginBtn.addEventListener("click", () => alert("MVP: iniciar sesión aún no está activo."));
+ctaBtn.addEventListener("click", () => alert("MVP: vender aún no está activo."));
 
 document.getElementById("termsLink")?.addEventListener("click", (e) => { e.preventDefault(); alert("MVP: términos aún no disponibles."); });
 document.getElementById("privacyLink")?.addEventListener("click", (e) => { e.preventDefault(); alert("MVP: privacidad aún no disponible."); });
