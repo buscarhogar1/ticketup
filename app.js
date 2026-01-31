@@ -6,6 +6,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const eventsStatus = document.getElementById("eventsStatus");
 const eventsGrid = document.getElementById("eventsGrid");
+const eventsPanel = document.getElementById("eventsPanel");
 
 const searchInput = document.getElementById("searchInput");
 const cityFilter = document.getElementById("cityFilter");
@@ -25,6 +26,9 @@ const listingsCount = document.getElementById("listingsCount");
 
 const errorBox = document.getElementById("errorBox");
 const errorText = document.getElementById("errorText");
+
+const sellBtn = document.getElementById("sellBtn");
+const loginBtn = document.getElementById("loginBtn");
 
 let allEvents = [];
 
@@ -137,8 +141,6 @@ async function loadEvents() {
 
   allEvents = events || [];
 
-  // Contador de entradas publicadas por evento (para el checkbox "solo con entradas")
-  // Esto hace 1 query por evento. Para MVP con pocos eventos vale.
   for (const ev of allEvents) {
     const { count } = await supabase
       .from("listing")
@@ -185,6 +187,8 @@ function renderListings(listings) {
 async function openEvent(ev) {
   clearError();
   eventDetail.style.display = "block";
+  eventsPanel.style.display = "none";
+
   crumbEventName.textContent = ev.name;
   eventTitle.textContent = ev.name;
   eventMeta.textContent = `${ev.city} · ${formatDate(ev.start_datetime)} · ${ev.venue_name}`;
@@ -210,6 +214,7 @@ async function openEvent(ev) {
 
 function closeEvent() {
   eventDetail.style.display = "none";
+  eventsPanel.style.display = "block";
   clearError();
 }
 
@@ -220,8 +225,12 @@ searchInput.addEventListener("input", applyFilters);
 cityFilter.addEventListener("change", applyFilters);
 onlyWithTickets.addEventListener("change", applyFilters);
 
-// Botones sin funcionalidad todavía
-document.getElementById("sellBtn").addEventListener("click", () => alert("MVP: vender aún no está activo."));
-document.getElementById("loginBtn").addEventListener("click", () => alert("MVP: login aún no está activo."));
+sellBtn.addEventListener("click", () => alert("MVP: vender aún no está activo."));
+loginBtn.addEventListener("click", () => alert("MVP: login aún no está activo."));
+
+document.getElementById("termsLink")?.addEventListener("click", (e) => { e.preventDefault(); alert("MVP: términos aún no disponibles."); });
+document.getElementById("privacyLink")?.addEventListener("click", (e) => { e.preventDefault(); alert("MVP: privacidad aún no disponible."); });
+document.getElementById("cookiesLink")?.addEventListener("click", (e) => { e.preventDefault(); alert("MVP: cookies aún no disponible."); });
 
 loadEvents();
+
