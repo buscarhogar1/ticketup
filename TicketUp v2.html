@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TicketUp — precio final, sin sorpresas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #F7F6F3;
+      --card:         #FFFFFF;
+      --text:         #0D0D14;
+      --muted:        #6B7280;
+      --border:       #E5E4E0;
+      --accent:       #00A86B;
+      --accent-hover: #008F5A;
+      --accent-faint: #E6F7F1;
+      --accent-faint2:#C2EBD9;
+      --shadow-sm:    0 1px 3px rgba(13,13,20,0.06);
+      --shadow-md:    0 4px 16px rgba(13,13,20,0.10);
+      --shadow-lg:    0 8px 40px rgba(13,13,20,0.12);
+      --radius-sm:    8px;
+      --radius-md:    12px;
+      --radius-lg:    18px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button { font-family: inherit; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D4D3CF; border-radius: 999px; }
+
+    @keyframes tu-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ── Tweaks panel ── */
+    #tweaks-panel {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 18px; box-shadow: var(--shadow-lg);
+      padding: 20px; width: 270px; z-index: 9999;
+      display: none;
+    }
+    #tweaks-panel h4 {
+      font-size: 11px; font-weight: 700; margin-bottom: 16px;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .tw-section { margin-bottom: 16px; }
+    .tw-label { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 8px; display: block; letter-spacing: 0.04em; }
+    .tw-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tw-chip {
+      padding: 5px 11px; border-radius: 999px; border: 1px solid var(--border);
+      font-size: 12px; cursor: pointer; background: #fff;
+      font-family: inherit; color: var(--text); transition: all 0.15s;
+    }
+    .tw-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .tw-chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tw-swatches { display: flex; gap: 8px; }
+    .tw-swatch {
+      width: 24px; height: 24px; border-radius: 50%;
+      cursor: pointer; border: 3px solid transparent; transition: border-color 0.15s;
+    }
+    .tw-swatch.on { border-color: var(--text); }
+    #tweaks-panel hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Tweaks Panel -->
+<div id="tweaks-panel">
+  <h4>Tweaks
+    <button id="tw-close" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0;line-height:1;">×</button>
+  </h4>
+  <div class="tw-section">
+    <span class="tw-label">Color acento</span>
+    <div class="tw-swatches" id="tw-accent">
+      <div class="tw-swatch on"  style="background:#00A86B" data-a="#00A86B" data-ah="#008F5A" data-f="#E6F7F1" data-f2="#C2EBD9" title="Verde"></div>
+      <div class="tw-swatch"     style="background:#2563EB" data-a="#2563EB" data-ah="#1D4ED8" data-f="#EEF4FF" data-f2="#BFDBFE" title="Azul"></div>
+      <div class="tw-swatch"     style="background:#7C3AED" data-a="#7C3AED" data-ah="#6D28D9" data-f="#F5F0FF" data-f2="#DDD6FE" title="Violeta"></div>
+      <div class="tw-swatch"     style="background:#EA580C" data-a="#EA580C" data-ah="#C2410C" data-f="#FFF4EE" data-f2="#FDDBB4" title="Naranja"></div>
+    </div>
+  </div>
+  <hr/>
+  <div class="tw-section">
+    <span class="tw-label">Modo</span>
+    <div class="tw-chips" id="tw-mode">
+      <button class="tw-chip on" data-m="light">☀ Claro</button>
+      <button class="tw-chip"    data-m="dark">🌙 Oscuro</button>
+    </div>
+  </div>
+  <hr/>
+  <div class="tw-section">
+    <span class="tw-label">Tipografía</span>
+    <div class="tw-chips" id="tw-font">
+      <button class="tw-chip on" data-f="Plus Jakarta Sans">Jakarta</button>
+      <button class="tw-chip"    data-f="Inter">Inter</button>
+      <button class="tw-chip"    data-f="DM Sans">DM Sans</button>
+    </div>
+  </div>
+  <hr/>
+  <div class="tw-section">
+    <span class="tw-label">Densidad</span>
+    <div class="tw-chips" id="tw-density">
+      <button class="tw-chip on" data-d="normal">Normal</button>
+      <button class="tw-chip"    data-d="compact">Compacto</button>
+    </div>
+  </div>
+</div>
+
+<script type="text/babel" src="tu_utils.jsx"></script>
+<script type="text/babel" src="tu_home.jsx"></script>
+<script type="text/babel" src="tu_event.jsx"></script>
+<script type="text/babel" src="tu_flows.jsx"></script>
+
+<script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "#00A86B",
+  "accentHover": "#008F5A",
+  "accentFaint": "#E6F7F1",
+  "accentFaint2": "#C2EBD9",
+  "darkMode": false,
+  "font": "Plus Jakarta Sans",
+  "density": "normal"
+}/*EDITMODE-END*/;
+
+// ── Root App ──────────────────────────────────────────────────────────────
+function App() {
+  const [page, setPage]                   = React.useState("home");
+  const [activeEvent, setActiveEvent]     = React.useState(null);
+  const [checkoutData, setCheckoutData]   = React.useState(null);
+  const [user, setUser]                   = React.useState(null);
+
+  // Apply TWEAK_DEFAULTS on mount
+  React.useEffect(() => {
+    applyTokens(TWEAK_DEFAULTS.accent, TWEAK_DEFAULTS.accentHover, TWEAK_DEFAULTS.accentFaint, TWEAK_DEFAULTS.accentFaint2);
+    document.body.style.fontFamily = `'${TWEAK_DEFAULTS.font}', system-ui, sans-serif`;
+    initTweaks();
+  }, []);
+
+  function applyTokens(a, ah, f, f2) {
+    const r = document.documentElement;
+    r.style.setProperty("--accent",       a);
+    r.style.setProperty("--accent-hover", ah);
+    r.style.setProperty("--accent-faint",  f);
+    r.style.setProperty("--accent-faint2", f2);
+  }
+
+  function setDark(on) {
+    const r = document.documentElement;
+    if (on) {
+      r.style.setProperty("--bg",     "#0D0D14");
+      r.style.setProperty("--card",   "#16161F");
+      r.style.setProperty("--text",   "#F0EFE9");
+      r.style.setProperty("--muted",  "#8888A0");
+      r.style.setProperty("--border", "#2A2A38");
+      document.body.style.background = "#0D0D14";
+      document.getElementById("tweaks-panel").style.background = "#16161F";
+    } else {
+      r.style.setProperty("--bg",     "#F7F6F3");
+      r.style.setProperty("--card",   "#FFFFFF");
+      r.style.setProperty("--text",   "#0D0D14");
+      r.style.setProperty("--muted",  "#6B7280");
+      r.style.setProperty("--border", "#E5E4E0");
+      document.body.style.background = "#F7F6F3";
+      document.getElementById("tweaks-panel").style.background = "#FFFFFF";
+    }
+  }
+
+  function initTweaks() {
+    const panel = document.getElementById("tweaks-panel");
+
+    // Accent swatches
+    document.getElementById("tw-accent").addEventListener("click", e => {
+      const sw = e.target.closest(".tw-swatch");
+      if (!sw) return;
+      document.querySelectorAll(".tw-swatch").forEach(s => s.classList.remove("on"));
+      sw.classList.add("on");
+      applyTokens(sw.dataset.a, sw.dataset.ah, sw.dataset.f, sw.dataset.f2);
+      window.parent.postMessage({ type:"__edit_mode_set_keys", edits:{ accent:sw.dataset.a } }, "*");
+    });
+
+    // Mode
+    document.getElementById("tw-mode").addEventListener("click", e => {
+      const btn = e.target.closest(".tw-chip");
+      if (!btn) return;
+      document.querySelectorAll("#tw-mode .tw-chip").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+      setDark(btn.dataset.m === "dark");
+      window.parent.postMessage({ type:"__edit_mode_set_keys", edits:{ darkMode: btn.dataset.m==="dark" } }, "*");
+    });
+
+    // Font
+    const gFonts = ["Inter","DM+Sans"];
+    const fontLink = document.createElement("link");
+    fontLink.rel = "stylesheet";
+    fontLink.href = `https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700;800&display=swap`;
+    document.head.appendChild(fontLink);
+
+    document.getElementById("tw-font").addEventListener("click", e => {
+      const btn = e.target.closest(".tw-chip");
+      if (!btn) return;
+      document.querySelectorAll("#tw-font .tw-chip").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+      document.body.style.fontFamily = `'${btn.dataset.f}', system-ui, sans-serif`;
+    });
+
+    // Density (future use)
+    document.getElementById("tw-density").addEventListener("click", e => {
+      const btn = e.target.closest(".tw-chip");
+      if (!btn) return;
+      document.querySelectorAll("#tw-density .tw-chip").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+    });
+
+    // Close
+    document.getElementById("tw-close").addEventListener("click", () => {
+      panel.style.display = "none";
+      window.parent.postMessage({ type:"__edit_mode_dismissed" }, "*");
+    });
+
+    // Host toggle
+    window.addEventListener("message", e => {
+      if (e.data?.type === "__activate_edit_mode")   panel.style.display = "block";
+      if (e.data?.type === "__deactivate_edit_mode") panel.style.display = "none";
+    });
+    window.parent.postMessage({ type:"__edit_mode_available" }, "*");
+  }
+
+  function navTo(p) {
+    setPage(p);
+    window.scrollTo({ top:0 });
+  }
+
+  return (
+    <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column" }}>
+      <Topbar page={page} setPage={navTo} user={user} setUser={setUser}/>
+      <div style={{ flex:1 }}>
+        {page === "home"     && <HomePage setPage={navTo} setActiveEvent={setActiveEvent}/>}
+        {page === "event"    && <EventPage event={activeEvent} setPage={navTo} setCheckoutListing={setCheckoutData}/>}
+        {page === "checkout" && <CheckoutPage data={checkoutData} setPage={navTo}/>}
+        {page === "sell"     && <SellPage setPage={navTo}/>}
+        {page === "panel"    && <PanelPage user={user} setPage={navTo}/>}
+      </div>
+      <Footer setPage={navTo}/>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
